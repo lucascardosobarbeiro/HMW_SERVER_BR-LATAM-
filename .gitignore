@@ -1,0 +1,36 @@
+# Terraform state files
+*.tfstate
+*.tfstate.backup
+*.tfvars
+crash.log
+override.tf
+override.tf.json
+terraform.tfstate
+terraform.tfstate.*
+.terraform/
+
+# Sensitive variable files (e.g., credentials)
+*.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# .terraform directory (modules, plugins, etc.)
+.terraform/
+
+# Local OS files
+.DS_Store
+Thumbs.db
+
+# VSCode and IDE configs
+.vscode/
+.idea/
+*.swp
+
+# Windows files
+ehthumbs.db
+Desktop.ini
+
+# Log/output/temp files
+*.log
+*.bak
+*.tmp
