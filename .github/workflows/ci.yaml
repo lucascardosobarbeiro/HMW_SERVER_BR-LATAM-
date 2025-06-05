@@ -11,9 +11,6 @@ env:
   TF_WORKDIR: "environments/default"
 
 jobs:
-  # ------------------------------------------
-  # 1) Verifica formatação e validação do Terraform
-  # ------------------------------------------
   terraform-lint:
     name: "Terraform Format & Validate"
     runs-on: ubuntu-latest
@@ -37,9 +34,6 @@ jobs:
           terraform init -input=false -backend=false
           terraform validate
 
-  # ------------------------------------------
-  # 2) Secret Scanning com truffleHog
-  # ------------------------------------------
   secret-scan:
     name: "Secret Scanning (truffleHog)"
     runs-on: ubuntu-latest
