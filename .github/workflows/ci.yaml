@@ -1,0 +1,59 @@
+name: CI Terraform & Secret Scanning
+
+on:
+  pull_request:
+    branches: ["TESTE"]
+  push:
+    branches: ["TESTE"]
+
+env:
+  TF_VERSION: "1.6.0"
+  TF_WORKDIR: "environments/default"
+
+jobs:
+  # ------------------------------------------
+  # 1) Verifica formatação e validação do Terraform
+  # ------------------------------------------
+  terraform-lint:
+    name: "Terraform Format & Validate"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform CLI
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform - fmt check
+        working-directory: ${{ env.TF_WORKDIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform - validate
+        working-directory: ${{ env.TF_WORKDIR }}
+        run: |
+          terraform init -input=false -backend=false
+          terraform validate
+
+  # ------------------------------------------
+  # 2) Secret Scanning com truffleHog
+  # ------------------------------------------
+  secret-scan:
+    name: "Secret Scanning (truffleHog)"
+    runs-on: ubuntu-latest
+    needs: terraform-lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Instalar Python3 e truffleHog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install truffleHog
+
+      - name: Executar truffleHog
+        run: trufflehog git .

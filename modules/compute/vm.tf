@@ -30,9 +30,11 @@ resource "google_compute_instance" "cod_mwr_server" {
     }
   }
 
- metadata = {
-    "startup-script-ps1" = file("${path.module}/../../environments/default/infra/scripts/startup.ps1")
-  }
+metadata = {
+  #chave de acesso corrigida
+  "windows-startup-script-ps1" = file("${path.module}/../../environments/default/infra/scripts/startup.ps1")
+}
+
 
   service_account {
     email  = var.service_account_email
