@@ -11,7 +11,8 @@ terraform.tfstate.*
 
 # Sensitive variable files (e.g., credentials)
 *.tfvars.json
-*.auto.tfvars
+*.vars.auto.tfvars
+*.tfvars
 *.auto.tfvars.json
 
 # .terraform directory (modules, plugins, etc.)
@@ -34,3 +35,5 @@ Desktop.ini
 *.log
 *.bak
 *.tmp
+
+# dados sensíveis

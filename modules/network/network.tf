@@ -2,11 +2,6 @@ resource "google_compute_network" "main" {
   name                    = var.network_name
   auto_create_subnetworks = false
 }
-output "subnet_name" {
-  value       = google_compute_subnetwork.main.name
-  description = "Nome da sub-rede criada"
-}
-
 
 resource "google_compute_subnetwork" "main" {
   name          = var.subnet_name
@@ -21,18 +16,40 @@ resource "google_compute_firewall" "allow_game_ports" {
 
   allow {
     protocol = "udp"
-    ports    = ["27015", "28960", "27016-27030"]
+    ports    = [var.game_port]      // 28960
+  }
+  allow {
+    protocol = "udp"
+    ports    = var.extra_udp_ports  // 27015, 27016-27030
   }
   allow {
     protocol = "tcp"
-    ports    = ["27015", "28960", "27016-27030", "3389"]
+    ports    = var.extra_tcp_ports  // 27015, 27016-27030
   }
 
   source_ranges = ["0.0.0.0/0"]
   direction     = "INGRESS"
-  target_tags   = ["cod-mwr"]
+  target_tags   = var.tags
 
   log_config {
     metadata = "INCLUDE_ALL_METADATA"
   }
 }
+/*
+resource "google_compute_firewall" "allow_rdp_admin" {
+  name    = "allow-rdp-admin"
+  network = google_compute_network.main.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+
+  /*source_ranges = var.allowed_admin_ips
+  direction     = "INGRESS"
+  target_tags   = var.tags
+
+  log_config {
+    metadata = "INCLUDE_ALL_METADATA"
+  }
+} */

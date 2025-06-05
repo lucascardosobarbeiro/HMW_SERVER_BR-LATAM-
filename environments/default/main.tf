@@ -5,12 +5,16 @@ provider "google" {
 }
 
 module "network" {
-  source           = "../../modules/network"
-  region           = var.region
-  subnet_name      = "hmw-subnet"
-  subnet_cidr      = "10.10.0.0/24"
-  network_name     = "hmw-network"
-  allowed_admin_ips = var.allowed_admin_ips
+  source            = "../../modules/network"
+  region            = var.region
+  subnet_name       = var.subnet_name
+  subnet_cidr       = var.subnet_cidr
+  network_name      = var.network_name
+  //allowed_admin_ips = var.allowed_admin_ips
+  game_port         = var.game_port
+  extra_udp_ports   = var.extra_udp_ports
+  extra_tcp_ports   = var.extra_tcp_ports
+  tags              = var.tags
 }
 
 module "compute" {
@@ -21,8 +25,8 @@ module "compute" {
   zone                  = var.zone
   region                = var.region
   service_account_email = var.service_account_email
+  tags                  = module.network.tags    // ou var.tags, se preferir
 }
-
 
 resource "google_monitoring_notification_channel" "email_alert" {
   project      = var.project_id
@@ -31,4 +35,9 @@ resource "google_monitoring_notification_channel" "email_alert" {
   labels = {
     email_address = var.alert_email
   }
+}
+
+output "server_static_ip" {
+  description = "IP estático do servidor COD MWR"
+  value       = module.compute.static_ip_address
 }

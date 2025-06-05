@@ -13,7 +13,7 @@ resource "google_compute_instance" "cod_mwr_server" {
   machine_type = "n2-standard-4"
   zone         = var.zone
 
-  tags = ["cod-mwr"]
+  tags = var.tags
 
   boot_disk {
     initialize_params {
@@ -29,10 +29,10 @@ resource "google_compute_instance" "cod_mwr_server" {
       nat_ip = google_compute_address.static_ip.address
     }
   }
-#veremos depois
- # metadata = {
-  #  windows-startup-script-ps1 = file("${path.module}/setup_cod_mwr.ps1")
-  #}
+
+ metadata = {
+    "startup-script-ps1" = file("${path.module}/../../environments/default/infra/scripts/startup.ps1")
+  }
 
   service_account {
     email  = var.service_account_email
@@ -46,5 +46,6 @@ resource "google_compute_instance" "cod_mwr_server" {
 }
 
 output "static_ip_address" {
-  value = google_compute_address.static_ip.address
+  description = "Endereço IP estático da VM"
+  value       = google_compute_address.static_ip.address
 }

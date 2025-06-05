@@ -1,0 +1,18 @@
+# coloque seus dados aqui e renomeie o arquivo tirando o.example
+# caso não coloque isso o terraform solicitará cada uma das informações abaixo manualmente (bem paia)
+
+project_id           = "x"
+region               = "x"
+zone                 = "southamerica-east1-a"
+network_name         = "x"
+subnet_name          = "x"
+subnet_cidr          = "x"
+allowed_admin_ips    = ["SEU_IP_PUBLICO/32"]
+game_port            = 28960
+extra_udp_ports      = ["27015", "27016-27030"]
+extra_tcp_ports      = ["27015", "27016-27030"]
+tags                 = ["cod-mwr"]
+instance_name        = "x"
+address_name         = "x"
+service_account_email = "x"
+alert_email          = "x"
