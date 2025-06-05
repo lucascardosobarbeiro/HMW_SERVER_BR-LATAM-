@@ -2,9 +2,9 @@ name: CI Terraform & Secret Scanning
 
 on:
   pull_request:
-    branches: ["TESTE"]
+    branches: ["teste"]
   push:
-    branches: ["TESTE"]
+    branches: ["teste"]
 
 env:
   TF_VERSION: "1.6.0"
