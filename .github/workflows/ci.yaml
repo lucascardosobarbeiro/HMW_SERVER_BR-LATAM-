@@ -2,9 +2,9 @@ name: CI Terraform
 
 on:
   push:
-    branches: ["main", "teste"]
+    branches: ["master", "teste"]
   pull_request:
-    branches: ["main", "teste"]
+    branches: ["master", "teste"]
 
 env:
   TF_VERSION: "1.6.0"
