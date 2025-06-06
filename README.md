@@ -414,7 +414,7 @@ Licensed under the MIT License. Contributions welcome!
 
 MIT License
 ______________________________________________________________________________________________________
-# Infraestrutura e Automação do Servidor HorizonMW ENG - US
+# Infraestrutura e Automação do Servidor HorizonMW PT-BR
 
 > **Mantido por [Lucas Cardoso Barbeiro](https://github.com/lucascardosobarbeiro)**
 > Solução cloud‐native com Infrastructure-as-Code para hospedar um servidor dedicado modificado de Call of Duty: Modern Warfare Remastered na Google Cloud Platform, completo com CI/CD, scripts de inicialização automatizados e boas práticas de segurança.
