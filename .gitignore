@@ -4,7 +4,9 @@
 
 # Local Terraform directories and files
 **/.terraform/**
-**/.terraform.lock.hcl
+
+# (Remova ou comente a linha abaixo para NÃO ignorar o lockfile)
+# **/.terraform.lock.hcl
 
 # State files
 **/*.tfstate
@@ -74,7 +76,7 @@ Desktop.ini
 # Visual Studio Code
 .vscode/
 .vscode/*
-!/.vscode/settings.json  # if you have workspace settings you do want to keep
+!/.vscode/settings.json  # se quiser manter configurações de workspace
 
 # IntelliJ
 .idea/
@@ -94,5 +96,4 @@ Desktop.ini
 # Git
 # =========================
 
-# Ignore .gitignore itself? No, keep .gitignore.
 # End of .gitignore
