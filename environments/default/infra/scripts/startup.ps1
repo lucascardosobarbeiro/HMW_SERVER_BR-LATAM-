@@ -1,3 +1,5 @@
+
+# DOESNT STILL WORK, REMOVEM RERENCES IN CODE AND REMOVE THIS FILE 
 <#
   startup.ps1 (versão final com melhorias e ajustes)
 
