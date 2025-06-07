@@ -9,7 +9,7 @@
 
 | #  | 🇺🇸 English Section                             | 🇧🇷 Seção em Português                                |
 | -- | ------------------------------------------------ | ------------------------------------------------------ |
-| 1  | [Why It Rocks](#why-it-rocks)                    | [Como Funciona](#por-que-e-incrivel)                   |
+| 1  | [Why It Rocks](#why-it-rocks)                    | [Como Funciona](#por-que-e-funciona)                   |
 | 2  | [Architecture Deep Dive](#architecture)          | [Visão da Arquitetura](#visao-da-arquitetura)          |
 | 3  | [Clone / Fork Guide](#clone--branches)           | [Clonar / Branches](#clonar--branches)                 |
 | 4  | [Provision Infrastructure](#provision-infra)     | [Prover Infraestrutura](#prover-infraestrutura)        |
@@ -36,7 +36,7 @@
 
 * **Portfolio Polish ✔** Inline diagrams, dual-language documentation, and a clear cost breakdown (\~ \$35 USD/month) make this repo recruiter-friendly.
 
-### 1‑BR · Por que funciona? {#por-que-e-incrivel}
+### 1‑BR · Por que funciona? {#por-que-e-funciona}
 
 * **Segurança ✔** Shielded VM, firewall mínimo, state remoto em GCS privado, segredos no GitHub.
 * **Robustez ✔** XMLs reiniciam serviços em falha; alertas de uptime e de CPU no Cloud Monitoring.
