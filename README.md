@@ -1,7 +1,7 @@
 # HorizonMW Cloud-Native Server Blueprint / Plano HorizonMW Cloud-Native
 
-**A complete, bilingual reference architecture for deploying *Call of Duty: Modern Warfare Remastered* (HorizonMW mod) on Google Cloud Platform.** Hardened, monitored, self-healing, yet intuitive enough to fork, deploy, and manage.
-**Uma arquitetura de referência completa e bilíngue para implantar *Call of Duty: Modern Warfare Remastered* (mod HorizonMW) na Google Cloud Platform.** Protegido, monitorado, auto-curável e suficientemente simples para clonar, implantar e administrar.
+**A complete, bilingual reference architecture for deploying *****Call of Duty: Modern Warfare Remastered***** (HorizonMW mod) on Google Cloud Platform.** Hardened, monitored, self-healing, yet intuitive enough to fork, deploy, and manage.
+**Uma arquitetura de referência completa e bilíngue para implantar *****Call of Duty: Modern Warfare Remastered***** (mod HorizonMW) na Google Cloud Platform.** Protegido, monitorado, auto-curável e suficientemente simples para clonar, implantar e administrar.
 
 ---
 
@@ -36,7 +36,7 @@
 
 * **Portfolio Polish ✔** Inline diagrams, dual-language documentation, and a clear cost breakdown (\~ \$35 USD/month) make this repo recruiter-friendly.
 
-### 1‑BR · Por Que É Incrível {#por-que-e-incrivel}
+### 1‑BR · Por que funciona? {#por-que-e-incrivel}
 
 * **Segurança ✔** Shielded VM, firewall mínimo, state remoto em GCS privado, segredos no GitHub.
 * **Robustez ✔** XMLs reiniciam serviços em falha; alertas de uptime e de CPU no Cloud Monitoring.
@@ -61,17 +61,17 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-| Layer          | Resource                                               | Purpose / Security Highlights     |
-| -------------- | ------------------------------------------------------ | --------------------------------- |
-| **State**      | GCS bucket (`uniform_bucket_level_access`, versioning) | Tamper‑proof Terraform state.     |
-| **Network**    | Custom VPC + subnet (`Private Google Access`)          | No default internet subnet.       |
-| **Firewall**   | Ingress 27016‑27030 UDP/TCP · 1624 TCP · 3389 TCP      | Inbound default‑deny.             |
-| **Identity**   | SA `hmw‑sa` (least‑privilege roles)                    | Key kept as GitHub Secret.        |
-| **Compute**    | Shielded VM `n2‑standard‑4`                            | Root‑kit‑resistant; OS Login off. |
-| **Storage**    | Balanced SSD 100 GB + daily snapshot                   | Fast I/O + durability.            |
-| **Logging**    | Cloud Logging agent                                    | Centralized, serial console off.  |
-| **Monitoring** | Uptime check 1624, CPU>85 % alert                      | PagerDuty/email ready.            |
-| **Budget**     | Alert \$50/mo                                          | Prevent surprises.                |
+| Layer          | Resource                                          | Purpose / Security Highlights     |
+| -------------- | ------------------------------------------------- | --------------------------------- |
+|                |                                                   |                                   |
+| **Network**    | Custom VPC + subnet (`Private Google Access`)     | No default internet subnet.       |
+| **Firewall**   | Ingress 27016‑27030 UDP/TCP · 1624 TCP · 3389 TCP | Inbound default‑deny.             |
+| **Identity**   | SA `hmw‑sa` (least‑privilege roles)               | Key kept as GitHub Secret.        |
+| **Compute**    | Shielded VM `n2‑standard‑4`                       | Root‑kit‑resistant; OS Login off. |
+| **Storage**    | Balanced SSD 100 GB + daily snapshot              | Fast I/O + durability.            |
+| **Logging**    | Cloud Logging agent                               | Centralized, serial console off.  |
+| **Monitoring** | Uptime check 1624, CPU>85 % alert                 | PagerDuty/email ready.            |
+| **Budget**     | Alert \$50/mo                                     | Prevent surprises.                |
 
 ### 2‑BR · Visão da Arquitetura {#visao-da-arquitetura}
 
@@ -90,6 +90,19 @@
 A tabela de camadas e recursos apresentada acima mantém o mesmo conteúdo, agora acompanhada pelo diagrama em português para facilitar a leitura.
 
 ---
+
+---
+
+## Implementation Details / Detalhes de Implementação Técnica
+
+* **Windows Image & Patches:** Utiliza a imagem **Windows Server 2019 Datacenter** (build 10.0.17763.3163) com todos os cumulative updates até junho de 2025 aplicados via WSUS.
+* **Terraform & Provider Versions:** Testado em **Terraform CLI v1.6.0** e provider `hashicorp/google` v6.37.0, com backend GCS configurado para uniform-bucket-level-access.
+* **Network Diagnostics:** Flow Logs habilitados em todas sub-redes, armazenando dados de tráfego no Cloud Logging com retenção de 7 dias.
+* **OS Login & RDP Security:** OS Login desativado; RDP exige NLA e é limitado a IPs de administração via firewall e GPO.
+* **Task Scheduler Registry Keys:** As tarefas XML geram entradas sob `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks` garantindo ordem e precedência de inicialização.
+* **Health Check Probes:** Uptime check faz cinco sondagens a cada 60 s, desencadeando alerta após 2 falhas consecutivas.
+* **Logging Agent Configuration:** O agente de Logging roda como serviço `StackdriverLogging`, coletando logs dos canais **System** e **Application**.
+* **Backup & Snapshots:** Snapshots diários agendados via policy `site-to-site-backup`, com opção de replicação cross-region para cenários de DR.
 
 ## 3 · Clone / Fork Guide {#clone--branches}
 
@@ -138,11 +151,11 @@ Mesmos passos em português.
 
 ## 6 · Import XML Automation {#import-xml-tasks}
 
-Files live in `infra/scripts/` and are also bundled for convenience — **[Download the ZIP](sandbox:/mnt/data/horizonmw_task_xmls.zip)**. Import order: Steam → Server1 → Server2 → IW4MAdmin. Adjust `<GAME_ROOT>` / `<STEAM_PATH>`.
+Files live in `infra/scripts/` and are also bundled for convenience — [**Download the ZIP**](sandbox:/mnt/data/horizonmw_task_xmls.zip). Import order: Steam → Server1 → Server2 → IW4MAdmin. Adjust `<GAME_ROOT>` / `<STEAM_PATH>`.
 
 ### 6‑BR · Importar XMLs {#importar-xmls}
 
-Mesma ordem, caminhos e dicas em português — **[Baixar ZIP](sandbox:/mnt/data/horizonmw_task_xmls.zip)**.
+Mesma ordem, caminhos e dicas em português — [**Baixar ZIP**](sandbox:/mnt/data/horizonmw_task_xmls.zip).
 
 ---
 
@@ -172,7 +185,7 @@ Pipeline e alertas descritos em português.
 | ---- | ----- | ---------- | -------------- | ------------- |
 | 4    | 16 GB | SSD 100 GB | 3 lobbies × 18 | \~ US \$35/mo |
 
-\* Jun 2025 GCP São Paulo pricing. **Actual bills may vary. Use the [GCP Pricing Calculator](https://cloud.google.com/products/calculator) for precise estimates.**
+\* Jun 2025 GCP São Paulo pricing. **Actual bills may vary. Use the **[**GCP Pricing Calculator**](https://cloud.google.com/products/calculator)** for precise estimates.**
 
 ### 9‑BR · Dimensionamento & Custos {#dimensionamento--metricas}
 
