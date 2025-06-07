@@ -1,188 +1,140 @@
-# HorizonMW Cloud‑Native Server Blueprint
+# HorizonMW Cloud-Native Server Blueprint / Plano HorizonMW Cloud-Native
 
-**A bilingual, production‑ready template for hosting *****Call of Duty: Modern Warfare Remastered***** (HorizonMW mod) on Google Cloud.** Hardened, monitored, and self‑healing, yet straightforward enough for any gamer‑turned‑engineer to fork, deploy, and frag.  Maintained by [Lucas Cardoso Barbeiro](https://github.com/lucascardosobarbeiro).
-
----
-
-## 📑 Contents / Conteúdo
-
-| #  | 🇺🇸 English Section                             | 🇧🇷 Seção em Português                                |
-| -- | ------------------------------------------------ | ------------------------------------------------------ |
-| 1  | [Why It Rocks](#why-it-rocks)                    | Como funciona                                          |
-| 2  | [Architecture Deep Dive](#architecture)          | [Visão da Arquitetura](#visao-da-arquitetura)          |
-| 3  | [Clone / Fork Guide](#clone--branches)           | [Clonar / Branches](#clonar--branches)                 |
-| 4  | [Provision Infrastructure](#provision-infra)     | [Prover Infraestrutura](#prover-infraestrutura)        |
-| 5  | [Install Game & Mod](#install-game)              | [Instalar Jogo & Mod](#instalar-o-jogo)                |
-| 6  | [Import XML Automation](#import-xml-tasks)       | [Importar XMLs](#importar-xmls)                        |
-| 7  | [Smoke Test](#smoke-test)                        | [Teste de Fumaça](#teste-de-fumaca)                    |
-| 8  | [CI/CD & Monitoring](#cicd--monitoring)          | [CI/CD & Monitoramento](#ci-cd--monitoramento)         |
-| 9  | [Sizing & Cost](#sizing--benchmarks)             | [Dimensionamento & Custos](#dimensionamento--metricas) |
-| 10 | [Contributing / License](#contributing--license) | [Contribuição / Licença](#contribuicao--licenca)       |
+**A complete, bilingual reference architecture for deploying *****Call of Duty: Modern Warfare Remastered***** (HorizonMW mod) on Google Cloud Platform.** Hardened, monitored, self-healing, yet intuitive enough to fork, deploy, and manage.
+**Uma arquitetura de referência completa e bilíngue para implantar *****Call of Duty: Modern Warfare Remastered***** (mod HorizonMW) na Google Cloud Platform.** Protegido, monitorado, auto-curável e suficientemente simples para clonar, implantar e administrar.
 
 ---
 
-## 1 · Why It Rocks {#why-it-rocks}
+## 1 · Project Overview / Visão Geral do Projeto
 
-* **Security ✔** Shielded VM, least‑open firewall, remote state in private GCS, and secrets injected via GitHub Actions.
+**English:**
+This repository provides an end-to-end blueprint: Terraform modules to provision network and Windows VM infrastructure; GitHub Actions CI/CD for validation, secret-scanning, and automated apply; Windows Task Scheduler XML definitions for self-healing startup of Steam, game lobbies, and IW4MAdmin; and Cloud Monitoring/Logging for observability. Ideal for showcasing DevOps expertise in a gaming context.
 
-* **Robustness ✔** Task‑Scheduler XMLs automatically restart any crashed service, while Cloud Monitoring keeps an eye on uptime and CPU usage.
-
-* **Performance ✔** The `n2‑standard‑4` flavor (4 vCPU, 16 GB RAM) paired with a 100 GB SSD stays under 70 % CPU even with three lobbies of 18 players; typical map load is under three seconds, with latency below 50 ms in São Paulo.
-
-* **CI/CD ✔** GitHub Actions enforces *terraform fmt* and *validate*, and runs `terraform apply` only on **master**. Secret‑scanning prevents credential leaks.
-
-* **Scalability ✔** Terraform modules are ready for Managed Instance Groups and UDP/TCP load‑balancing when you outgrow a single VM.
-
-* **Portfolio Polish ✔** Inline diagrams, dual‑language documentation, and a clear cost breakdown (\~ \$35 USD/month) make this repo recruiter‑friendly.
-
-### 1‑BR · Como funciona {#por-que-e-incrivel} 
-
-**Segurança ✔** Shielded VM, firewall mínimo, state remoto em GCS privado, segredos no GitHub.
-**Robustez ✔** XMLs reiniciam serviços em falha; alertas de uptime e de CPU no Cloud Monitoring.
-**Desempenho ✔** 4 vCPU, 16 GB, SSD 100 GB → 3 lobbies × 18 jogadores com ≤ 70 % CPU; load ≤ 3 s.
-**CI/CD ✔** Pipeline exige *fmt*/validate e aplica infra só na **master**.
-**Escalável ✔** Pronto para MIG + Load Balancer.
-**Portfólio ✔** README bilíngue, diagramas, custos (\~ R\$ 175/mês).
+**Português:**
+Este repositório oferece um blueprint completo: módulos Terraform para provisionar rede e infraestrutura de VM Windows; CI/CD com GitHub Actions para validação, auditoria de segredos e aplicação automatizada; definições XML do Agendador de Tarefas Windows para auto-recuperação de Steam, salas de jogo e IW4MAdmin; e Monitoramento/Logging no Cloud para observabilidade. Perfeito para demonstrar habilidades DevOps no contexto de games.
 
 ---
 
-## 2 · Architecture Deep Dive {#architecture}
+## 2 · Technical Infrastructure Details / Detalhes Técnicos da Infraestrutura
 
-```txt
-┌──────────── Google Cloud (southamerica‑east1) ─────────────┐
-│ VPC 10.10.0.0/24  →  Firewall UDP/TCP 27016‑27030 | 3389   │
-│                                                           │
-│ Windows Server 2019 │ n2‑standard‑4 │ SSD 100 GB           │
-│  · Shielded VM, secure‑boot, vTPM                         │
-│  · startup.ps1 (legacy, harmless)                        │
-│  · Task Scheduler XMLs → health‑checks & auto‑restart     │
-│  · Cloud Monitoring uptime check (TCP 1624)               │
-└─────────────────────────────────────────────────────────────┘
-```
+### 2.1 Terraform Structure / Estrutura Terraform
 
-| Layer          | Resource                                                        | Purpose / Security Highlights     |
-| -------------- | --------------------------------------------------------------- | --------------------------------- |
-| **State**      | GCS bucket (`uniform_bucket_level_access`, versioning)          | Tamper‑proof Terraform state.     |
-| **Network**    | Custom VPC + subnet (`Private Google Access`)                   | No default internet subnet.       |
-| **Firewall**   | Ingress 27016‑27030 UDP/TCP · 1624 TCP · 3389 TCP (whitelisted) | Inbound default‑deny.             |
-| **Identity**   | SA `hmw‑sa` (least‑privilege roles)                             | Key kept as GitHub Secret.        |
-| **Compute**    | Shielded VM `n2‑standard‑4`                                     | Root‑kit‑resistant; OS Login off. |
-| **Storage**    | Balanced SSD 100 GB + daily snapshot                            | Fast I/O + durability.            |
-| **Logging**    | Cloud Logging agent                                             | Centralized, serial console off.  |
-| **Monitoring** | Uptime check 1624, CPU>85 % alert                               | PagerDuty/email ready.            |
-| **Budget**     | Alert \$50/mo                                                   | Prevent surprises.                |
+* **Backend:** GCS bucket regional com versionamento e `uniform_bucket_level_access`.
+* **Providers:** Google Cloud (network, compute).
+* **Modules:**
 
-### 2‑BR · Visão da Arquitetura {#visao-da-arquitetura}
+  * `network`: VPC, sub-rede, regras de firewall (UDP/TCP 27016–27030, TCP 1624, TCP 3389).
+  * `compute`: endereço IP estático, Windows VM (`n2-standard-4`, SSD 100 GB, Shielded VM).
+* **State Locking:** impede drifts e garante colaboração segura.
 
-```txt
-┌────────── Google Cloud (região southamerica‑east1) ──────────┐
-│ VPC 10.10.0.0/24  →  Firewall UDP/TCP 27016‑27030 | 3389     │
-│                                                             │
-│ Windows Server 2019 │ n2‑standard‑4 │ SSD 100 GB             │
-│  · Shielded VM, secure‑boot, vTPM                           │
-│  · startup.ps1 (legado, inofensivo)                        │
-│  · XMLs do Agendador → health‑checks & auto‑restart         │
-│  · Cloud Monitoring uptime check (TCP 1624)                 │
-└───────────────────────────────────────────────────────────────┘
-```
+### 2.2 Network & Firewall / Rede & Firewall
 
-A tabela de camadas e recursos apresentada acima mantém o mesmo conteúdo, agora acompanhada pelo diagrama em português para facilitar a leitura.
+* **VPC:** `10.10.0.0/24`, Private Google Access.
+* **Sub‑rede:** configurable CIDR.
+* **Regras:**
+
+  * UDP/TCP 27016–27030 (jogos).
+  * TCP 1624 (admin WebFront).
+  * TCP 3389 (RDP — IPs de admin).
+* **Política:** inbound-deny por padrão, egress allow.
+
+### 2.3 Compute Engine / Máquina Virtual
+
+* **Tipo:** `n2-standard-4` (4 vCPU, 16 GB RAM).
+* **Disco:** SSD Balanced 100 GB.
+* **Proteções:** Shielded VM (secure-boot, vTPM), OS Login desativado.
+* **Scripts iniciais:** `startup.ps1` (legado, fallback).
+
+### 2.4 Observability & Security / Observabilidade & Segurança
+
+* **Logging:** Cloud Logging agent para Windows Event Log e logs customizados.
+* **Monitoring:** Uptime check TCP 1624, alertas CPU > 85%, alerta de orçamento.
+* **IAM:** service account com roles mínimos armazenada como secret no GitHub.
 
 ---
 
-## 3 · Clone / Fork Guide {#clone--branches}
+## 3 · Windows Automation Artefacts / Artefatos de Automação no Windows
 
-```bash
-# Fork then clone (recommended)
-git clone https://github.com/<seu‑usuario>/HMW_SERVER_BR-LATAM-.git
-cd HMW_SERVER_BR-LATAM-
+Scripts legados (`startup.ps1`) residem em `infra/scripts/`, mas a orquestração real ocorre via XML:
 
-# Add upstream for future sync
-git remote add upstream https://github.com/lucascardosobarbeiro/HMW_SERVER_BR-LATAM-.git
-```
+| XML File                                 | Delay | Action                                         | Retry Policy      |
+| ---------------------------------------- | ----- | ---------------------------------------------- | ----------------- |
+| **INICIA\_STEAM.xml**                    | 0 min | Launch Steam.exe                               | none              |
+| **Server\_start\_horizon-1-Startup.xml** | 3 min | Execute `server_default.bat` (UDP port 27016)  | 2 retries @ 5 min |
+| **Server\_start\_horizon-2-Startup.xml** | 5 min | Execute `server2_default.bat` (UDP port 27017) | 2 retries @ 5 min |
+| **IW4ADMIN.xml**                         | 7 min | Run `StartIW4MAdmin.cmd` (TCP port 1624)       | 3 retries @ 1 min |
 
-**Secrets → Actions**: `GCP_PROJECT_ID`, `GCP_SA_KEY`, optional `ALERT_EMAIL`.
+**Import Steps / Passos de Importação:**
 
-Branch policy: work on **teste** ➜ PR ➜ merge into **master** → auto‑deploy.
-
-### 3‑BR · Clonar / Branches {#clonar--branches}
-
-Mesmos comandos acima; lembre‑se de criar os *Secrets* no GitHub.
-
----
-
-## 4 · Provision Infrastructure {#provision-infra}
-
-1. Edit `environments/default/vars.auto.tfvars`.
-2. `git push` to **teste** → CI *fmt*/validate.
-3. Merge PR into **master** → CI `terraform apply`; outputs show IP etc.
-
-### 4‑BR · Prover Infraestrutura {#prover-infraestrutura}
-
-Passos idênticos, descritos em português.
+1. Abra Task Scheduler → **Import Task…**.
+2. Selecione cada XML na ordem acima (Steam → Lobby 1 → Lobby 2 → IW4MAdmin).
+3. Edite `<Arguments>` e `<WorkingDirectory>` para `<GAME_ROOT>` e `<STEAM_PATH>`.
+4. Marque **Run whether user is logged on or not**.
 
 ---
 
-## 5 · Install Game & Mod {#install-game}
+## 4 · Usage Workflow / Fluxo de Uso Passo a Passo
 
-* RDP in, install **Steam** + legit COD MWR.
-* Follow Horizon guide → [https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/](https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/).
-* Copy server files to `<GAME_ROOT>`, duplicate for lobby 2.
+1. **Clone & Fork**
 
-### 5‑BR · Instalar Jogo & Mod {#instalar-o-jogo}
+   ```bash
+   git clone https://github.com/<usuario>/HMW_SERVER_BR-LATAM-.git
+   cd HMW_SERVER_BR-LATAM-
+   git remote add upstream https://github.com/lucascardosobarbeiro/HMW_SERVER_BR-LATAM-.git
+   ```
+2. **Configure GitHub Secrets**
 
-Mesmos passos em português.
+   * `GCP_PROJECT_ID`, `GCP_SA_KEY` (JSON), opcional `ALERT_EMAIL`.
+3. **Populate Variables**
 
----
+   * Copie `vars.auto.tfvars.example` → `vars.auto.tfvars` e ajuste parâmetros (`project_id`, `region`, IPs, portas).
+4. **Deploy Infra (branch **\`\`**)**
 
-## 6 · Import XML Automation {#import-xml-tasks}
+   ```bash
+   git checkout -B teste
+   git add .
+   git commit -m "Configure infra vars"
+   git push -u origin teste
+   ```
+5. **Apply to Production (branch **\`\`**)**
 
-Files live in `infra/scripts/` and are also bundled for convenience — **[Download the ZIP](sandbox:/mnt/data/horizonmw_task_xmls.zip)**. Import order: Steam → Server1 → Server2 → IW4MAdmin. Adjust `<GAME_ROOT>` / `<STEAM_PATH>`.
+   ```bash
+   git checkout master
+   git merge teste
+   git push origin master
+   ```
+6. **RDP na VM**
 
-### 6‑BR · Importar XMLs {#importar-xmls}
+   * Conecte ao IP estático exibido nos outputs.
+7. **Install Game & Mod**
 
-Mesma ordem, caminhos e dicas em português — **[Baixar ZIP](sandbox:/mnt/data/horizonmw_task_xmls.zip)**.
+   * Instale Steam e *COD MWR* via client oficial.
+   * Siga o guia: [https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/](https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/).
+   * Copie `server_default.bat/.cfg` e `server2_default.*` para `<GAME_ROOT>`.
+8. **Import XML Tasks**
 
----
+   * Use o ZIP: [Download ZIP](sandbox:/mnt/data/horizonmw_task_xmls.zip).
+   * Importe na ordem e ajuste caminhos.
+9. **Smoke Test / Teste de Fumaça**
 
-## 7 · Smoke Test {#smoke-test}
-
-`netstat` on VM, `connect IP:27016`, chat `!owner`, browse WebFront 1624.
-
-### 7‑BR · Teste de Fumaça {#teste-de-fumaca}
-
-Mesmos comandos e checagens em português.
-
----
-
-## 8 · CI/CD & Monitoring {#cicd--monitoring}
-
-Pipeline: *fmt*/validate → secret‑scan → apply (master only). Monitoring: uptime, CPU, budget.
-
-### 8‑BR · CI/CD & Monitoramento {#ci-cd--monitoramento}
-
-Pipeline e alertas descritos em português.
-
----
-
-## 9 · Sizing & Costs {#sizing--benchmarks}
-
-| vCPU | RAM   | Disk       | Players        | Cost\*        |
-| ---- | ----- | ---------- | -------------- | ------------- |
-| 4    | 16 GB | SSD 100 GB | 3 lobbies × 18 | \~ US \$35/mo |
-
-\* Jun 2025 GCP São Paulo pricing. **Actual bills may vary. Use the [Google Cloud Pricing Calculator](https://cloud.google.com/products/calculator) with your own usage assumptions for an exact estimate.**
-
-### 9‑BR · Dimensionamento & Custos {#dimensionamento--metricas}
-
-Tabela acima traduzida.
+   * `netstat -ano | findstr 27016 27017 1624`
+   * Cliente: `connect <IP>:27016`, digite `!owner`.
+   * Navegador: `http://<IP>:1624`.
 
 ---
 
-## 10 · Contributing / License {#contributing--license}
+## 5 · Final Notes / Observações Finais
 
-MIT License — PRs welcome!  Diagram sources in `/docs` folder.
+* **Costs May Vary:** \~US \$35/mo per VM; scale-out (3 VMs) \~\$90/mo. Use the [GCP Pricing Calculator](https://cloud.google.com/products/calculator) for precise estimates.
+* **Resilience:** Shielded VM + XML-driven self-healing + Monitoring form a robust recovery loop.
+* **Portfolio Value:** Clear bilingual docs, diagrams, step-by-step instructions, and a modern DevOps showcase.
 
-### 10‑BR · Contribuição / Licença {#contribuicao--licenca}
+---
 
-Código sob **MIT License** — contribuições são bem‑vindas.
+## 6 · Contribution / License / Contact
+
+MIT License — contributions welcome!  Diagram sources in `/docs`.
+
+**Contact / Contato:**
+✉️ [lcb.barbeiro@gmail.com](mailto:lcb.barbeiro@gmail.com)
+🔗 [LinkedIn](https://www.linkedin.com/in/lucascardosobarbeiro/)
