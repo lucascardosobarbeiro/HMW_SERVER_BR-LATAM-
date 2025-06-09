@@ -13,7 +13,7 @@ The HorizonMW Server Blueprint automates the full deployment of a COD MWR dedica
 * **Windows Task Scheduler** XML tasks for auto-start and self-healing of Steam, game lobbies, and IW4MAdmin.
 * **Cloud Monitoring & Logging** for uptime checks, CPU and budget alerts, and centralized log collection.
 
-Use this blueprint to host public or private game lobbies with minimal downtime, support tournament-grade reliability, or learn modern DevOps practices in a gaming context. ***This blueprint only provied the infracstrute, like cpu, hard disk, statis ip, network, you need to follow this steps when requested https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/*** 
+Use this blueprint to host public or private game lobbies with minimal downtime, support tournament-grade reliability, or learn modern DevOps practices in a gaming context.
 
 ---
 
@@ -57,16 +57,16 @@ Edit `vars.auto.tfvars` with your values:
 * `network_name`, `subnet_cidr`
 * `instance_name`, `allowed_admin_ips`, etc.
 
-### 4. Deploy Infrastructure ( isn´t necessary if you put the correct credentials at step 3, i´m just improve best Devops practice)
+### 4. Deploy Infrastructure
 
 ```bash
-git checkout -B (your branch name)
+git checkout -B teste
 git add . && git commit -m "Configure infrastructure variables"
-git push -u origin (your branch name)
+git push -u origin teste
 # After CI validation succeeds:
-git checkout (your branch name)
-git merge (your branch name)
-git push origin (your branch name)
+git checkout master
+git merge teste
+git push origin master
 ```
 
 This triggers GitHub Actions to run `terraform apply` and provision your network, VM, and firewall.
@@ -165,18 +165,24 @@ Monitoring & Logging
 
 ---
 
-🤝 Contributing & Contact
+## 🤝 Contributing & Contact
 
-Fork the repository, open a pull request, and use the teste branch for development. Protect the master branch to ensure production changes only arrive via reviewed merges.
+Fork the repository, open a pull request, and use the `teste` branch for development. Protect the `master` branch to ensure production changes only arrive via reviewed merges.
 
-Contact:✉️ lcb.barbeiro@gmail.com🔗 LinkedIn
+**Contact:**
+✉️ [lcb.barbeiro@gmail.com](mailto:lcb.barbeiro@gmail.com)
+🔗 [LinkedIn](https://www.linkedin.com/in/lucascardosobarbeiro/)
 
-🙋 Questions & Suggestions
+## 🙋 Questions & Suggestions
 
 Have questions or ideas for improvement? Feel free to:
 
-Open a GitHub Issue in this repository.
+* Open a GitHub Issue in this repository.
+* Email me at [lcb.barbeiro@gmail.com](mailto:lcb.barbeiro@gmail.com).
+* Connect on LinkedIn: [https://www.linkedin.com/in/lucascardosobarbeiro/](https://www.linkedin.com/in/lucascardosobarbeiro/)
 
-Email me at lcb.barbeiro@gmail.com.
+---
 
-Connect on LinkedIn: https://www.linkedin.com/in/lucascardosobarbeiro/
+## 📄 License
+
+MIT License.
