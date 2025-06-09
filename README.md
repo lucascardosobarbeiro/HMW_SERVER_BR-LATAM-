@@ -12,6 +12,7 @@ The HorizonMW Server Blueprint automates the full deployment of a COD MWR dedica
 * **GitHub Actions** for CI/CD: running `terraform fmt`/`validate`, secret scanning, and controlled applies on `master`.
 * **Windows Task Scheduler** XML tasks for auto-start and self-healing of Steam, game lobbies, and IW4MAdmin.
 * **Cloud Monitoring & Logging** for uptime checks, CPU and budget alerts, and centralized log collection.
+***THIS PROJECT ONLY GIVE YOU THE INFRA, YOU MUST FOLLOW THIS STEPS AFTER CREATED IT -> https://docs.horizonmw.org/hmw-game-server-setup-guide-dedicated/*** 
 
 Use this blueprint to host public or private game lobbies with minimal downtime, support tournament-grade reliability, or learn modern DevOps practices in a gaming context.
 
@@ -81,7 +82,7 @@ This triggers GitHub Actions to run `terraform apply` and provision your network
 4. Download and extract HorizonMW server files into your game root directory (`<GAME_ROOT>`).
 
 ---
-
+## After finish this steps, you will proceed
 ## 📑 Import Windows Automation Tasks
 
 On the VM, open **Task Scheduler → Import Task…** and import these XMLs in order:
@@ -91,13 +92,29 @@ On the VM, open **Task Scheduler → Import Task…** and import these XMLs in o
 3. `Server_start_horizon-2-Startup.xml` (5 min delay)
 4. `IW4ADMIN.xml` (7 min delay)
 
-For each task:
+For each Server_start_horizon task:
 
 * **Program/script:** `powershell.exe` or `cmd.exe`
 * **Arguments:** full path to the script or batch file (e.g., `C:\Game\server_default.bat`)
 * **Start in:** game root directory
 * Enable **Run whether user is logged on or not** and **Run with highest privileges**
 
+For Steam  task:
+
+* **Program/script:** `powershell.exe` or `cmd.exe`
+* **Arguments:** full path to the script or batch file (e.g., `C:\Program Files (x86)\Steam\steam.exe`)
+* **Start in:** steam root directory
+* Enable **Run whether user is logged on or not** and **Run with highest privileges**
+
+For IW4ADMIN task task:
+
+* **Program/script:** `Put DOT after the path, because it runs only with DOT"
+* **Arguments:** full path to the script or batch file (e.g., `C:\Program Files (x86)\{your-local-path}`)
+* **Start in:** file root directory
+* Enable **Run whether user is logged on or not** and **Run with highest privileges**
+
+
+##  After created, run manually each Task starting first  steam to ensure it will run 
 ---
 
 ## 🚦 Smoke Test
